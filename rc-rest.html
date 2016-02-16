@@ -1,0 +1,236 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<script src="./path-to-regexp.js"></script>
+<script src="./rest_setting.js"></script>
+
+<!--
+An element providing hook and type to do iron-ajax.
+
+Example:
+
+    <rc-rest></rc-rest>
+
+Example:
+
+    <rc-rest>
+    </rc-rest>
+
+@demo demo/index.html
+-->
+
+<dom-module id="rc-rest">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+    </style>
+
+    <iron-ajax
+      id="request"
+      handle-as="json"
+      loading="{{loading}}"
+      content-type="application/json"
+      last-response="{{lastResponse}}"
+      last-error="{{lastError}}"
+      body="{{body}}"
+      on-error="_onError"
+      on-response="_onResponse">
+    </iron-ajax>
+  </template>
+
+  <script>
+  (function(RcRestSetting){
+    'use strict';
+
+    Polymer({
+      is: 'rc-rest',
+      attached: function() {
+        if (this.auto) {
+          this.do();
+        }
+      },
+
+      properties: {
+        /**
+         * The type of this rest.
+         */
+        type: {
+          type: String,
+        },
+
+        /**
+         * `auto` indicates that the element should send a request automatically,
+         * while the element is attached.
+         */
+        auto: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
+        /**
+         * `lastResponse` stores the last response json data.
+         */
+        lastResponse: {
+          notify: true
+        },
+
+        /**
+         * `lastError` stores the last response error.
+         */
+        lastError: {
+          notify: true
+        },
+        // lastRestError: {
+        // },
+
+        /**
+         * Set the `body` to change the request body.
+         */
+        body: {
+          type: Object,
+          notify: true
+        },
+
+
+        /**
+         * `disableGlobalMiddleware` indicates that the element should disable the global middlewares,
+         * while sending a request.
+         */
+        disableGlobalMiddleware: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set the `urlParams` to change the parmas of the request url.
+         */
+        urlParams: {
+          type: Object
+        },
+
+        /**
+         * If `loading` is true, it means that the response is loading,
+         * same as the `loading` of iron-ajax.
+         * This prop should be read only.
+         */
+        loading: {
+          type: Boolean,
+          notify: true
+        }
+      },
+
+
+      /**
+       * The `response` event is fired whenever the response is get.
+       *
+       * @event response
+       * @detail {object}
+       */
+      _onResponse: function(event) {
+        this.fire('response', event.detail, {bubbles: false});
+      },
+
+      /**
+       * The `error` event is fired whenever the error response is get.
+       *
+       * @event error
+       * @detail {object}
+       */
+      _onError: function(event) {
+        this.fire('error', event.detail, {bubbles: false});
+
+        // 设置lastRestError
+        // var api = mpRestSetting.getApi(this.type);
+        // var restError = 'Unknown Error';
+        // if (api.errors) {
+        //   var status = this.lastError.request.status + '';
+        //
+        //   for (var key in api.errors) {
+        //     if (status === key) {
+        //       restError = api.errors[key];
+        //       break;
+        //     }
+        //   }
+        // }
+        // this.lastRestError = restError;
+        // this.fire('rest-error', restError, {bubbles: false});
+      },
+
+      /**
+       * Send the request.
+       *
+       * @param {string} greeting A positive greeting.
+       * @return {object} The request in iron-ajax request type.
+       */
+      do: function() {
+        var request = this.$.request;
+
+        if (!this.disableGlobalMiddleware) {
+          RcRestSetting.middlewares.forEach(function(middleFunc) {
+            middleFunc(request);
+          });
+        }
+
+        request.url = this._buildUrl();
+        request.method = getMethodByApiType(this.type);
+
+        this.$.request.generateRequest();
+      },
+
+      _buildUrl: function() {
+        var url = '';
+        if (!this.disableCross) {
+          url += getBaseUrl();
+        }
+        if (!this.disablePrefix) {
+          url += RcRestSetting.prefix;
+        }
+        return url + getUrlByApiType(this.type, this.urlParams);
+      }
+    });
+
+    // Get the base url, like `http://10.12.31.1:1024/v2`.
+    function getBaseUrl() {
+      var host = RcRestSetting.host;
+      var base = '';
+
+      if (!host || !host.ip) {
+        return base;
+      }
+      base = 'http://' + host.ip;
+
+      if (host.port) {
+        base = base + ':' + host.port;
+      }
+      return base;
+    }
+
+    // Get the api object in restApis.
+    function getApi(key) {
+      return RcRestSetting.restApis[key];
+    }
+
+    // Get the method of api, default by "GET".
+    function getMethodByApiType(type) {
+      var api = getApi(type);
+      var method = 'GET';
+      if (api.method) {
+        method = api.method;
+      }
+      return method;
+    }
+
+    // Get the url and method by type and params.
+    //
+    // @return {object} Url and method
+    function getUrlByApiType(type, params) {
+      var api = getApi(type);
+      var pathToRegexp = window.pathToRegexp;
+      var compiler = pathToRegexp.compile(api.url);
+      return compiler(params);
+    }
+  })(window.RcRestSetting);
+  </script>
+</dom-module>

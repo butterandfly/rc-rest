@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../rc-rest.html">
+    <script src="">
+
+    </script>
+  </head>
+  <body>
+
+    <!-- You can use the document as a place to set up your fixtures. -->
+    <test-fixture id="rc-rest-fixture">
+      <template>
+        <rc-rest></rc-rest>
+      </template>
+    </test-fixture>
+
+    <script>
+      var RcRestSetting = window.RcRestSetting;
+      suite('<rc-rest>', function() {
+
+        var myEl;
+
+        setup(function() {
+          myEl = fixture('rc-rest-fixture');
+
+          // reset RCRestSetting
+          RcRestSetting.restApis = {};
+          RcRestSetting.host = null;
+          RcRestSetting.prefix = '';
+        });
+
+        test('RcRestSetting is exist', function() {
+          assert.typeOf(window.RcRestSetting, 'object');
+        });
+
+        test('build the correct url by api', function() {
+          RcRestSetting.restApis['test'] = {
+            url: '/test'
+          };
+          RcRestSetting.host = {
+            ip: '10.12.1.1',
+            port: '8080'
+          };
+          myEl.type = 'test';
+          assert.equal(myEl._buildUrl(), 'http://10.12.1.1:8080/test');
+
+          // prefix situation
+          RcRestSetting.prefix = "/mewtwo";
+          assert.equal(myEl._buildUrl(), 'http://10.12.1.1:8080/mewtwo/test');
+
+          // no port
+          RcRestSetting.host.port = '';
+          assert.equal(myEl._buildUrl(), 'http://10.12.1.1/mewtwo/test');
+
+          // no host
+          RcRestSetting.host = null;
+          assert.equal(myEl._buildUrl(), '/mewtwo/test');
+        });
+
+        test('send the request with the correct url and method', function() {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: '/test'
+          };
+
+          myEl.do();
+          var ajaxEl = myEl.$.request;
+          assert.equal(ajaxEl.url, '/test');
+          assert.equal(ajaxEl.method, 'GET');
+
+          RcRestSetting.restApis.test = {
+            url: '/test',
+            method: 'POST'
+          };
+          myEl.do();
+          assert.equal(ajaxEl.method, 'POST');
+        });
+
+        test('data property', function() {
+
+        });
+
+        // test('defines the "author" property', function() {
+        //   assert.equal(myEl.author.name, 'Dimitri Glazkov');
+        //   assert.equal(myEl.author.image, 'http://addyosmani.com/blog/wp-content/uploads/2013/04/unicorn.jpg');
+        // });
+        //
+        // test('says hello', function() {
+        //   assert.equal(myEl.sayHello(), 'rc-rest says, Hello World!');
+        //
+        //   var greetings = myEl.sayHello('greetings Earthlings');
+        //   assert.equal(greetings, 'rc-rest says, greetings Earthlings');
+        // });
+        //
+        // test('fires lasers', function(done) {
+        //   myEl.addEventListener('rc-rest-lasers', function(event) {
+        //     assert.equal(event.detail.sound, 'Pew pew!');
+        //     done();
+        //   });
+        //   myEl.fireLasers();
+        // });
+        //
+        // test('distributed children', function() {
+        //   var els = myEl.getContentChildren();
+        //   assert.equal(els.length, 1, 'one distributed node');
+        //   assert.equal(els[0], myEl.querySelector('h2'), 'content distributed correctly');
+        // });
+
+      });
+    </script>
+
+  </body>
+</html>
