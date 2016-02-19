@@ -26,9 +26,16 @@
       suite('<rc-rest>', function() {
 
         var myEl;
+        var waitingTime;
+        var addTest = function(request) {
+          request.headers = {
+            'test': 'test'
+          };
+        };
 
         setup(function() {
           myEl = fixture('rc-rest-fixture');
+          waitingTime = 2000;
 
           // reset RCRestSetting
           RcRestSetting.restApis = {};
@@ -83,8 +90,95 @@
           assert.equal(ajaxEl.method, 'POST');
         });
 
-        test('lastResponse property', function() {
+        test('auto & lastResponse property', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'testData.json'
+          };
 
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('response', function() {
+            assert.equal(ajaxEl.lastResponse.type, 'rc-rest-test');
+            done();
+          });
+
+          myEl.auto = true;
+        });
+
+        test('set false to auto property', function(done) {
+          myEl.type = 'test',
+          RcRestSetting.restApis.test = {
+            url: '/test'
+          };
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('response', function() {
+            assert(!ajaxEl.url, 'set false to auto property don\'t worked.');
+            done();
+          });
+          setTimeout(function() {done()}, waitingTime);
+        });
+
+        test('error event', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'errorUrl'
+          };
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('error',  function(event) {
+            assert.ok(event.detail.request);
+            assert.ok(event.detail.error);
+            done();
+          });
+          myEl.do();
+        });
+
+        test('lastError property', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'errorUrl'
+          };
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('error', function() {
+            assert.ok(ajaxEl.lastError);
+            done();
+          });
+          assert.notOk(ajaxEl.lastError);
+          myEl.do();
+        });
+
+        test('middlewares is working', function(done) {
+          var ajaxEl = myEl.$.request;
+
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: '/test'
+          };
+          RcRestSetting.middlewares = [addTest];
+
+          ajaxEl.addEventListener('request', function() {
+            assert.equal(ajaxEl.requestHeaders.test, 'test');
+            done();
+          });
+          myEl.do();
+        });
+
+        test('disable all middlewares by setting true to the `disableGlobalMiddleware` property', function(done) {
+          var ajaxEl = myEl.$.request;
+
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: '/test'
+          };
+          RcRestSetting.middlewares = [addTest];
+          myEl.disableGlobalMiddleware = true;
+
+          ajaxEl.addEventListener('request', function() {
+            assert.notOk(ajaxEl.requestHeaders.test);
+            done();
+          });
+          myEl.do();
         });
 
         // test('defines the "author" property', function() {

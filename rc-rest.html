@@ -45,11 +45,6 @@ Example:
 
     Polymer({
       is: 'rc-rest',
-      attached: function() {
-        if (this.auto) {
-          this.do();
-        }
-      },
 
       properties: {
         /**
@@ -66,7 +61,8 @@ Example:
         auto: {
           type: Boolean,
           value: false,
-          notify: true
+          notify: true,
+          observer: '_changeAuto'
         },
 
         /**
@@ -156,6 +152,18 @@ Example:
         // }
         // this.lastRestError = restError;
         // this.fire('rest-error', restError, {bubbles: false});
+      },
+
+      /**
+       * The `_changeAuto` event is fired when the auto property is changed.
+       *
+       * @event changeAuto
+       * @detail {object}
+       */
+      _changeAuto: function() {
+        if (this.auto) {
+          this.do();
+        }
       },
 
       /**
