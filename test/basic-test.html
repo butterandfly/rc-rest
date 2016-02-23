@@ -14,12 +14,18 @@
   </head>
   <body>
 
-    <!-- You can use the document as a place to set up your fixtures. -->
     <test-fixture id="rc-rest-fixture">
       <template>
         <rc-rest></rc-rest>
       </template>
     </test-fixture>
+
+    <test-fixture id="rc-rest-auto-fixture">
+      <template>
+        <rc-rest auto type="test"></rc-rest>
+      </template>
+    </test-fixture>
+
 
     <script>
       var RcRestSetting = window.RcRestSetting;
@@ -105,34 +111,6 @@
           myEl.auto = true;
         });
 
-        test('set false to auto property', function(done) {
-          myEl.type = 'test',
-          RcRestSetting.restApis.test = {
-            url: '/test'
-          };
-          var ajaxEl = myEl.$.request;
-          ajaxEl.addEventListener('response', function() {
-            assert(!ajaxEl.url, 'set false to auto property don\'t worked.');
-            done();
-          });
-          setTimeout(function() {done()}, waitingTime);
-        });
-
-        test('error event', function(done) {
-          myEl.type = 'test';
-          RcRestSetting.restApis.test = {
-            url: 'errorUrl'
-          };
-
-          var ajaxEl = myEl.$.request;
-          ajaxEl.addEventListener('error',  function(event) {
-            assert.ok(event.detail.request);
-            assert.ok(event.detail.error);
-            done();
-          });
-          myEl.do();
-        });
-
         test('lastError property', function(done) {
           myEl.type = 'test';
           RcRestSetting.restApis.test = {
@@ -181,31 +159,49 @@
           myEl.do();
         });
 
-        // test('defines the "author" property', function() {
-        //   assert.equal(myEl.author.name, 'Dimitri Glazkov');
-        //   assert.equal(myEl.author.image, 'http://addyosmani.com/blog/wp-content/uploads/2013/04/unicorn.jpg');
-        // });
-        //
-        // test('says hello', function() {
-        //   assert.equal(myEl.sayHello(), 'rc-rest says, Hello World!');
-        //
-        //   var greetings = myEl.sayHello('greetings Earthlings');
-        //   assert.equal(greetings, 'rc-rest says, greetings Earthlings');
-        // });
-        //
-        // test('fires lasers', function(done) {
-        //   myEl.addEventListener('rc-rest-lasers', function(event) {
-        //     assert.equal(event.detail.sound, 'Pew pew!');
-        //     done();
-        //   });
-        //   myEl.fireLasers();
-        // });
-        //
-        // test('distributed children', function() {
-        //   var els = myEl.getContentChildren();
-        //   assert.equal(els.length, 1, 'one distributed node');
-        //   assert.equal(els[0], myEl.querySelector('h2'), 'content distributed correctly');
-        // });
+        // ------- auto -------
+
+        test('send request automatically', function(done) {
+          RcRestSetting.restApis.test = {
+            url: 'testData.json'
+          };
+          var rest = fixture('rc-rest-auto-fixture');
+          rest.addEventListener('rest-response', function(event) {
+            assert.ok(rest.lastResponse.type, "rc-rest-test");
+            done();
+          });
+
+        });
+
+        test('the default `auto` should be false', function(done) {
+          myEl.type = 'test',
+          RcRestSetting.restApis.test = { url: '/test' };
+
+          assert.notOk(myEl.auto);
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('response', function() {
+            assert(!ajaxEl.url, 'set false to auto property don\'t worked.');
+            done();
+          });
+          setTimeout(done, waitingTime);
+        });
+
+        // ------- events -------
+
+        test('rest-error event', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'errorUrl'
+          };
+
+          myEl.addEventListener('rest-error',  function(event) {
+            assert.ok(event.detail.request);
+            assert.ok(event.detail.error);
+            done();
+          });
+          myEl.do();
+        });
 
       });
     </script>

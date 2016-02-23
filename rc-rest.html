@@ -60,9 +60,7 @@ Example:
          */
         auto: {
           type: Boolean,
-          value: false,
-          notify: true,
-          observer: '_changeAuto'
+          value: false
         },
 
         /**
@@ -117,6 +115,10 @@ Example:
         }
       },
 
+      observers: [
+        '_observeRestOptions(auto)'
+      ],
+
 
       /**
        * The `response` event is fired whenever the response is get.
@@ -125,7 +127,7 @@ Example:
        * @detail {object}
        */
       _onResponse: function(event) {
-        this.fire('response', event.detail, {bubbles: false});
+        this.fire('rest-response', event.detail, {bubbles: false});
       },
 
       /**
@@ -135,7 +137,7 @@ Example:
        * @detail {object}
        */
       _onError: function(event) {
-        this.fire('error', event.detail, {bubbles: false});
+        this.fire('rest-error', event.detail, {bubbles: false});
 
         // 设置lastRestError
         // var api = mpRestSetting.getApi(this.type);
@@ -160,10 +162,19 @@ Example:
        * @event changeAuto
        * @detail {object}
        */
-      _changeAuto: function() {
-        if (this.auto) {
-          this.do();
-        }
+
+      // The observer of type and auto.
+      _observeRestOptions: function(auto) {
+        var self = this;
+        this.debounce('do', function() {
+          if (!self.type) {
+            return;
+          }
+
+          if (self.auto) {
+            self.do();
+          }
+        });
       },
 
       /**

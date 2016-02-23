@@ -1,13 +1,4 @@
 <!doctype html>
-<!--
-@license
-Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
 <html>
   <head>
     <meta charset="utf-8">
@@ -20,28 +11,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     <p>An example of <code>&lt;rc-rest&gt;</code>:</p>
 
-    <p>Make words! <button id="saybtn">Say Something</button></p>
-    <p>Make lasers! <button id="laserbtn">Fire lasers</button></p>
-
-    <rc-rest author='{"name": "Lord Meowser", "image": "http://lorempixel.com/g/300/200/cats/"}' fancy>
-      <h2>Hello rc-rest</h2>
+    <rc-rest type="login">
     </rc-rest>
 
+    <button id="send" type="button" name="button">Send Request!</button>
+
     <script>
-      var seedElement = document.querySelector('rc-rest');
+      var apis = {
+        login: {
+          type: 'login',
+          url: '/components/rc-rest/demo/login.json',
+          method: 'GET',
+          errors: {
+            '401': '用户名或密码错误'
+          }
+        },
+        host: null
+      };
 
-      document.querySelector('#saybtn').addEventListener('click', function() {
-        alert(seedElement.sayHello('Hallo!'));
+      window.RcRestSetting.restApis = apis;
+
+      // TODO: middleware
+
+      // TODO: compile url
+
+      var restEl = document.querySelector('rc-rest');
+
+      document.querySelector('#send').addEventListener('click', function() {
+        restEl.do();
       });
 
-      document.querySelector('#laserbtn').addEventListener('click', function() {
-        seedElement.fireLasers();
+      restEl.addEventListener('response', function() {
+        alert(restEl.lastResponse);
       });
-
-      document.addEventListener("rc-rest-lasers", function(e) {
-        console.log(e.detail.sound);
-      });
-
     </script>
 
   </body>
