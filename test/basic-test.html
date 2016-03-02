@@ -203,6 +203,47 @@
           myEl.do();
         });
 
+        // ------- respHook -------
+
+        test('should execute `respHook` after get the response', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'testData.json'
+          };
+          RcRestSetting.respHook = function(detail) {
+            window.resp = detail;
+          };
+          window.resp = null;
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('response', function(event) {
+            assert.equal(window.resp, event.detail);
+            done();
+          });
+
+          myEl.auto = true;
+        });
+
+        test('should not execute `respHook` while `disableRespHook` is true', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'testData.json'
+          };
+          RcRestSetting.respHook = function(detail) {
+            window.thisShouldNotExit = 7;
+          };
+          window.thisShouldNotExit = null;
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('response', function(event) {
+            assert.equal(window.thisShouldNotExit, null);
+            done();
+          });
+
+          myEl.disableRespHook = true;
+          myEl.auto = true;
+        });
+
       });
     </script>
 

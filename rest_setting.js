@@ -9,7 +9,9 @@
     prefix: '',
     disableCross: true,
     // Store all the middlewares.
-    middlewares: []
+    middlewares: [],
+    // Execute when get response
+    respHook: null
   };
   window.RcRestSetting = restSetting;
 })(window);

@@ -98,6 +98,14 @@ Example:
         },
 
         /**
+         * `disableRespHook` indicates that the element should disable the global respHook.
+         */
+        disableRespHook: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * Set the `urlParams` to change the parmas of the request url.
          */
         urlParams: {
@@ -127,6 +135,10 @@ Example:
        * @detail {object}
        */
       _onResponse: function(event) {
+        if (!this.disableRespHook && RcRestSetting.respHook) {
+          RcRestSetting.respHook(event.detail);
+        }
+
         this.fire('rest-response', event.detail, {bubbles: false});
       },
 
