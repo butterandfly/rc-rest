@@ -106,6 +106,14 @@ Example:
         },
 
         /**
+         * `disableErrorHook` indicates that the element should disable the global errorHook.
+         */
+        disableErrorHook: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
          * Set the `urlParams` to change the parmas of the request url.
          */
         urlParams: {
@@ -134,12 +142,12 @@ Example:
        * @event response
        * @detail {object}
        */
-      _onResponse: function(event) {
+      _onResponse: function(event, request) {
         if (!this.disableRespHook && RcRestSetting.respHook) {
-          RcRestSetting.respHook(event.detail);
+          RcRestSetting.respHook(request);
         }
 
-        this.fire('rest-response', event.detail, {bubbles: false});
+        this.fire('rest-response', request, {bubbles: false});
       },
 
       /**
@@ -148,8 +156,12 @@ Example:
        * @event error
        * @detail {object}
        */
-      _onError: function(event) {
-        this.fire('rest-error', event.detail, {bubbles: false});
+      _onError: function(event, detail) {
+        if (!this.disableErrorHook && RcRestSetting.errorHook) {
+          RcRestSetting.errorHook(detail);
+        }
+
+        this.fire('rest-error', detail, {bubbles: false});
 
         // 设置lastRestError
         // var api = mpRestSetting.getApi(this.type);

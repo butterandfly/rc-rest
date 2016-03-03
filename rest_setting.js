@@ -11,7 +11,9 @@
     // Store all the middlewares.
     middlewares: [],
     // Execute when get response
-    respHook: null
+    respHook: null,
+    // Execute when get error
+    errorHook: null
   };
   window.RcRestSetting = restSetting;
 })(window);

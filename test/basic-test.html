@@ -244,6 +244,47 @@
           myEl.auto = true;
         });
 
+        // ------- errorHook -------
+        test('should execute `errorHook` after get the error', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'wrong.json'
+          };
+          RcRestSetting.errorHook = function(detail) {
+            window.restError = detail;
+          };
+          window.restError = null;
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('error', function(event) {
+            assert.equal(window.restError, event.detail);
+            assert.equal(window.restError.request.status, 404);
+            done();
+          });
+
+          myEl.auto = true;
+        });
+
+        test('should not execute `errorHook` while `disableErrorHook` is true', function(done) {
+          myEl.type = 'test';
+          RcRestSetting.restApis.test = {
+            url: 'wrong.json'
+          };
+          RcRestSetting.errorHook = function(detail) {
+            window.thisShouldNotExit = 7;
+          };
+          window.thisShouldNotExit = null;
+
+          var ajaxEl = myEl.$.request;
+          ajaxEl.addEventListener('error', function(event) {
+            assert.equal(window.thisShouldNotExit, null);
+            done();
+          });
+
+          myEl.disableErrorHook = true;
+          myEl.auto = true;
+        });
+
       });
     </script>
 

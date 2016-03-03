@@ -1,18 +1,20 @@
 {
   "name": "rc-rest",
-  "version": "1.0.7",
+  "version": "0.3.1",
   "authors": [
-    "Anonymous <anonymous@example.com>"
+    "butterandfly <zero.hero.lin@gmail.com>"
   ],
-  "description": "An element providing a solution to no problem in particular.",
+  "description": "An element providing a solution to get send restful request easier.",
   "keywords": [
     "web-component",
     "polymer",
-    "seed"
+    "request",
+    "restful",
+    "rest"
   ],
   "main": "rc-rest.html",
   "license": "http://polymer.github.io/LICENSE.txt",
-  "homepage": "https://github.com/<USERNAME>/seed-element/",
+  "homepage": "https://github.com/butterandfly/rc-rest/",
   "ignore": [
     "/.*",
     "/test/"
