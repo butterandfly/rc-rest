@@ -53,6 +53,32 @@
           assert.typeOf(window.RcRestSetting, 'object');
         });
 
+        test('build the correct url with queryParams', function() {
+          RcRestSetting.restApis['test'] = {
+            url: '/test'
+          };
+
+          myEl.type = 'test';
+          myEl.queryParams = {
+            name: 'zero',
+            id: '1-a-*'
+          };
+          assert.equal(myEl._buildUrl(), '/test?name=zero&id=1-a-*');
+          myEl.queryParams = {};
+          assert.equal(myEl._buildUrl(), '/test');
+          myEl.queryParams = null;
+          assert.equal(myEl._buildUrl(), '/test');
+
+
+          RcRestSetting.restApis['test'] = {
+            url: '/test?some=thing'
+          };
+          myEl.queryParams = {};
+          assert.equal(myEl._buildUrl(), '/test?some=thing');
+          myEl.queryParams = {name: 'zero'};
+          assert.equal(myEl._buildUrl(), '/test?some=thing&name=zero');
+        });
+
         test('build the correct url by api', function() {
           RcRestSetting.restApis['test'] = {
             url: '/test'

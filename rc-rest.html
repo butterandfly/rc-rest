@@ -121,6 +121,13 @@ Example:
         },
 
         /**
+         * Set the `queryParams` to change the parmas of the url query.
+         */
+        queryParams: {
+          type: Object
+        },
+
+        /**
          * If `loading` is true, it means that the response is loading,
          * same as the `loading` of iron-ajax.
          * This prop should be read only.
@@ -230,9 +237,29 @@ Example:
         if (!this.disablePrefix) {
           url += RcRestSetting.prefix;
         }
-        return url + getUrlByApiType(this.type, this.urlParams);
+        url += getUrlByApiType(this.type, this.urlParams);
+
+        if (this.queryParams) {
+          url = addQueryParamsToUrl(this.queryParams, url);
+        }
+        return url;
       }
     });
+
+    // Add query params to the url.
+    function addQueryParamsToUrl(params, url) {
+      if (url.indexOf('?') < 0) {
+        url += '?';
+      } else {
+        url += '&';
+      }
+
+      for (var key in params) {
+        url += key + '=' + params[key] + '&';
+      }
+
+      return url.slice(0, url.length-1);
+    }
 
     // Get the base url, like `http://10.12.31.1:1024/v2`.
     function getBaseUrl() {
